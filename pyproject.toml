@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kurenai"
-description = "TODO write description or delete"
+description = "Thin wrapper of google-research's rouge-score; supports non-ascii by default"
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT License" }
 authors = [{ name = "nikkie", email = "takuyafjp+develop@gmail.com" }]
-keywords = ["TODO", "write", "keywords"]
+keywords = ["ROUGE", "rouge score"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
