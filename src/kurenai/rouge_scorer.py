@@ -9,4 +9,4 @@ class RougeScorer(BaseScorer):
         self._scorer = OriginalRougeScorer(rouge_types)
 
     def score(self, target, prediction):
-        raise NotImplementedError
+        return self._scorer.score(target, prediction)
