@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from rouge_score.tokenize import SPACES_RE
 from rouge_score.tokenizers import Tokenizer
 
