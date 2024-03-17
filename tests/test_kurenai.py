@@ -22,3 +22,13 @@ class TestRougeScorer:
         fscore = 2 * precision * recall / (precision + recall)
         expected = {"rouge1": Score(precision, recall, fscore)}
         assert actual == expected
+
+    def test_rouge1_non_ascii(self) -> None:
+        scorer = RougeScorer(["rouge1"])
+        actual = scorer.score("テスト いち に", "テスト に")
+
+        precision = 1 / 1
+        recall = 2 / 3
+        fscore = 2 * precision * recall / (precision + recall)
+        expected = {"rouge1": Score(precision, recall, fscore)}
+        assert actual == expected
