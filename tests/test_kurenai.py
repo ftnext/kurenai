@@ -13,7 +13,7 @@ class TestRougeScorer:
         assert sut._scorer.rouge_types == ["rouge1", "rougeL"]
 
     def test_rouge1_ascii(self) -> None:
-        # ref: https://github.com/google-research/google-research/blob/c34656f25265e717cc7f051a99185594892fd041/rouge/rouge_scorer_test.py#L58-L63  # NOQA* E501
+        # ref: https://github.com/google-research/google-research/blob/c34656f25265e717cc7f051a99185594892fd041/rouge/rouge_scorer_test.py#L58-L63  # NOQA: E501
         scorer = RougeScorer(["rouge1"])
         actual = scorer.score("testing one two", "testing")
 
