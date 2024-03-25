@@ -48,3 +48,14 @@ class TestRougeScorer:
             fscore = fscore_helper(precision, recall)
             expected = {"rouge2": Score(precision, recall, fscore)}
             assert actual == expected
+
+        def test_rougeL(self) -> None:
+            # ref: https://github.com/google-research/google-research/blob/4e9dcd23ab81f6bf3d0f09ba5557e991cd56658d/rouge/rouge_scorer_test.py#L94-L99  # NOQA: E501
+            scorer = RougeScorer(["rougeL"])
+            actual = scorer.score("テスト いち に", "テスト いち")
+
+            precision = 2 / 2
+            recall = 2 / 3
+            fscore = fscore_helper(precision, recall)
+            expected = {"rougeL": Score(precision, recall, fscore)}
+            assert actual == expected
