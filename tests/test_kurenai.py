@@ -32,7 +32,7 @@ class TestRougeScorer:
             scorer = RougeScorer(["rouge1"])
             actual = scorer.score("テスト いち に", "テスト に")
 
-            precision = 1 / 1
+            precision = 2 / 2
             recall = 2 / 3
             fscore = fscore_helper(precision, recall)
             expected = {"rouge1": Score(precision, recall, fscore)}
