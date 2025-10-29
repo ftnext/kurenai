@@ -14,7 +14,7 @@ rouge-score remove non-ascii characters by default, so ROUGE of Japanese text be
 
 Currently, It is at a developing status:
 
-* Supports ROUGE1 only
+* Supports ROUGE-N and ROUGE-L only
 
 ## Usage
 
