@@ -28,52 +28,53 @@ class TestRougeScorer:
         assert actual == expected
 
     class TestNonAscii:
-        def test_rouge1(self) -> None:
-            scorer = RougeScorer(["rouge1"])
-            actual = scorer.score("テスト いち に", "テスト に")
+        class TestScore:
+            def test_rouge1(self) -> None:
+                scorer = RougeScorer(["rouge1"])
+                actual = scorer.score("テスト いち に", "テスト に")
 
-            precision = 2 / 2
-            recall = 2 / 3
-            fscore = fscore_helper(precision, recall)
-            expected = {"rouge1": Score(precision, recall, fscore)}
-            assert actual == expected
+                precision = 2 / 2
+                recall = 2 / 3
+                fscore = fscore_helper(precision, recall)
+                expected = {"rouge1": Score(precision, recall, fscore)}
+                assert actual == expected
 
-        def test_rouge2(self) -> None:
-            # ref: https://github.com/google-research/google-research/blob/c34656f25265e717cc7f051a99185594892fd041/rouge/rouge_scorer_test.py#L87-L92  # NOQA: E501
-            scorer = RougeScorer(["rouge2"])
-            actual = scorer.score("テスト いち に", "テスト いち")
+            def test_rouge2(self) -> None:
+                # ref: https://github.com/google-research/google-research/blob/c34656f25265e717cc7f051a99185594892fd041/rouge/rouge_scorer_test.py#L87-L92  # NOQA: E501
+                scorer = RougeScorer(["rouge2"])
+                actual = scorer.score("テスト いち に", "テスト いち")
 
-            precision = 1 / 1
-            recall = 1 / 2  # 「テスト いち」「いち に」
-            fscore = fscore_helper(precision, recall)
-            expected = {"rouge2": Score(precision, recall, fscore)}
-            assert actual == expected
+                precision = 1 / 1
+                recall = 1 / 2  # 「テスト いち」「いち に」
+                fscore = fscore_helper(precision, recall)
+                expected = {"rouge2": Score(precision, recall, fscore)}
+                assert actual == expected
 
-        def test_rougeL(self) -> None:
-            # ref: https://github.com/google-research/google-research/blob/4e9dcd23ab81f6bf3d0f09ba5557e991cd56658d/rouge/rouge_scorer_test.py#L94-L99  # NOQA: E501
-            scorer = RougeScorer(["rougeL"])
-            actual = scorer.score("テスト いち に", "テスト いち")
+            def test_rougeL(self) -> None:
+                # ref: https://github.com/google-research/google-research/blob/4e9dcd23ab81f6bf3d0f09ba5557e991cd56658d/rouge/rouge_scorer_test.py#L94-L99  # NOQA: E501
+                scorer = RougeScorer(["rougeL"])
+                actual = scorer.score("テスト いち に", "テスト いち")
 
-            precision = 2 / 2
-            recall = 2 / 3
-            fscore = fscore_helper(precision, recall)
-            expected = {"rougeL": Score(precision, recall, fscore)}
-            assert actual == expected
+                precision = 2 / 2
+                recall = 2 / 3
+                fscore = fscore_helper(precision, recall)
+                expected = {"rougeL": Score(precision, recall, fscore)}
+                assert actual == expected
 
-        def test_multiple_rouge_types(self) -> None:
-            scorer = RougeScorer(["rouge1", "rougeL"])
-            actual = scorer.score("テスト いち に", "テスト いち")
+            def test_multiple_rouge_types(self) -> None:
+                scorer = RougeScorer(["rouge1", "rougeL"])
+                actual = scorer.score("テスト いち に", "テスト いち")
 
-            precision_1 = 2 / 2
-            recall_1 = 2 / 3
-            fscore_1 = fscore_helper(precision_1, recall_1)
+                precision_1 = 2 / 2
+                recall_1 = 2 / 3
+                fscore_1 = fscore_helper(precision_1, recall_1)
 
-            precision_l = 2 / 2
-            recall_l = 2 / 3
-            fscore_l = fscore_helper(precision_l, recall_l)
+                precision_l = 2 / 2
+                recall_l = 2 / 3
+                fscore_l = fscore_helper(precision_l, recall_l)
 
-            expected = {
-                "rouge1": Score(precision_1, recall_1, fscore_1),
-                "rougeL": Score(precision_l, recall_l, fscore_l),
-            }
-            assert actual == expected
+                expected = {
+                    "rouge1": Score(precision_1, recall_1, fscore_1),
+                    "rougeL": Score(precision_l, recall_l, fscore_l),
+                }
+                assert actual == expected
