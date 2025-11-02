@@ -78,3 +78,14 @@ class TestRougeScorer:
                     "rougeL": Score(precision_l, recall_l, fscore_l),
                 }
                 assert actual == expected
+
+        class TestScoreMulti:
+            def test_rouge1(self) -> None:
+                scorer = RougeScorer(["rouge1"])
+                actual = scorer.score_multi(["テスト いち に"], "テスト に")
+
+                precision = 2 / 2
+                recall = 2 / 3
+                fscore = fscore_helper(precision, recall)
+                expected = {"rouge1": Score(precision, recall, fscore)}
+                assert actual == expected

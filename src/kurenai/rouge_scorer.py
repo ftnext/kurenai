@@ -14,3 +14,6 @@ class RougeScorer(BaseScorer):
 
     def score(self, target, prediction):
         return self._scorer.score(target, prediction)
+
+    def score_multi(self, targets, prediction):
+        return self._scorer.score_multi(targets, prediction)
