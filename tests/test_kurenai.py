@@ -5,6 +5,8 @@ from kurenai.rouge_scorer import RougeScorer
 
 
 def fscore_helper(precision: float, recall: float) -> float:
+    if precision + recall == 0:
+        return 0.0
     return 2 * precision * recall / (precision + recall)
 
 
@@ -88,4 +90,30 @@ class TestRougeScorer:
                 recall = 2 / 3
                 fscore = fscore_helper(precision, recall)
                 expected = {"rouge1": Score(precision, recall, fscore)}
+                assert actual == expected
+
+            def test_multiple_rouge_types(self) -> None:
+                scorer = RougeScorer(["rouge1", "rouge2", "rougeL"])
+                actual = scorer.score_multi(
+                    ["最初 テキスト", "最初 何か"], "テキスト 最初"
+                )
+
+                precision_1 = 2 / 2
+                recall_1 = 2 / 2  # 0番目のテキストによるrecallが最大なので使用
+                fscore_1 = fscore_helper(precision_1, recall_1)
+
+                precision_2 = 0 / 1
+                recall_2 = 0 / 2
+                fscore_2 = fscore_helper(precision_2, recall_2)
+
+                # LCS（最長共通部分列）は「テキスト」または「最初」の1語
+                precision_L = 1 / 2
+                recall_L = 1 / 2
+                fscore_L = fscore_helper(precision_L, recall_L)
+
+                expected = {
+                    "rouge1": Score(precision_1, recall_1, fscore_1),
+                    "rouge2": Score(precision_2, recall_2, fscore_2),
+                    "rougeL": Score(precision_L, recall_L, fscore_L),
+                }
                 assert actual == expected
