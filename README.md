@@ -14,7 +14,9 @@ rouge-score remove non-ascii characters by default, so ROUGE of Japanese text be
 
 Currently, It is at a developing status:
 
-* Supports ROUGE-N and ROUGE-L only
+* Supports ROUGE-N (1, 2, ..., 9) and ROUGE-L
+    * TODO: ROUGE-Lsum
+* Supports both `RougeScorer.score()` and `RougeScorer.score_multi()`
 
 ## Usage
 
