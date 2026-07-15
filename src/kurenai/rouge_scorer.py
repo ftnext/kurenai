@@ -5,6 +5,7 @@ from typing import Literal, TypedDict
 
 from rouge_score.rouge_scorer import RougeScorer as OriginalRougeScorer
 from rouge_score.scoring import BaseScorer, Score
+from rouge_score.tokenizers import Tokenizer
 
 from kurenai.tokenizers import AllCharacterSupportTokenizer
 
@@ -46,7 +47,13 @@ class RougeScorer(BaseScorer):
                               "The quick brown dog jumps on the log.")
     """
 
-    def __init__(self, rouge_types: Iterable[RougeType]) -> None:
+    def __init__(
+        self,
+        rouge_types: Iterable[RougeType],
+        use_stemmer: bool = False,
+        split_summaries: bool = False,
+        tokenizer: Tokenizer | None = None,
+    ) -> None:
         """Initializes a new RougeScorer.
 
         Valid rouge types that can be computed are:
@@ -58,9 +65,34 @@ class RougeScorer(BaseScorer):
 
         Args:
             rouge_types: An iterable of rouge types to calculate.
+            use_stemmer: Bool indicating whether the Porter stemmer should
+                be used to strip word suffixes to improve matching. This is
+                honored by kurenai's own default tokenizer
+                (AllCharacterSupportTokenizer), which only stems ASCII
+                alphanumeric tokens longer than 3 characters and leaves
+                non-ASCII tokens (e.g. Japanese) untouched. Unlike
+                rouge-score's original RougeScorer, this value is *not*
+                forwarded to rouge-score's DefaultTokenizer, because that
+                tokenizer drops non-ASCII characters. If a custom
+                ``tokenizer`` is given, this arg has no effect on it -- the
+                same as how rouge-score's use_stemmer only affects its
+                DefaultTokenizer.
+            split_summaries: Whether to add newlines between sentences for
+                rougeLsum. This is passed through to rouge-score as-is.
+                rouge-score splits sentences with nltk.sent_tokenize, which
+                assumes English text, so this option is only reliable for
+                English summaries.
+            tokenizer: Tokenizer object which has a tokenize() method. When
+                omitted, kurenai's AllCharacterSupportTokenizer(use_stemmer=
+                use_stemmer) is used so that non-ASCII text keeps working by
+                default.
         """
+        if tokenizer is None:
+            tokenizer = AllCharacterSupportTokenizer(use_stemmer=use_stemmer)
         self._scorer = OriginalRougeScorer(
-            list(rouge_types), tokenizer=AllCharacterSupportTokenizer()
+            list(rouge_types),
+            split_summaries=split_summaries,
+            tokenizer=tokenizer,
         )
 
     def score(self, target: str, prediction: str) -> RougeScoreDict:

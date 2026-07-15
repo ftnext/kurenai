@@ -1,5 +1,6 @@
 from rouge_score.rouge_scorer import RougeScorer as OriginalRougeScorer
 from rouge_score.scoring import BaseScorer, Score
+from rouge_score.tokenizers import Tokenizer
 
 from kurenai.rouge_scorer import RougeScorer
 
@@ -152,3 +153,71 @@ class TestRougeScorer:
                     "rougeL": Score(precision_L, recall_L, fscore_L),
                 }
                 assert actual == expected
+
+    class TestConstructorCompat:
+        def test_use_stemmer_matches_original_rouge_score(self) -> None:
+            # "dogs"/"dog", "running"/"runs" are different tokens unless
+            # stemmed; use_stemmer=True should make kurenai and rouge-score
+            # agree on purely ASCII text.
+            target = "The dogs are running in the park"
+            prediction = "The dog runs in the park"
+
+            sut = RougeScorer(["rouge1", "rougeL"], use_stemmer=True)
+            original = OriginalRougeScorer(
+                ["rouge1", "rougeL"], use_stemmer=True
+            )
+
+            assert sut.score(target, prediction) == original.score(
+                target, prediction
+            )
+
+        def test_use_stemmer_true_changes_ascii_score(self) -> None:
+            # Without stemming, "dogs" != "dog" and "running" != "runs", so
+            # the score should differ from the stemmed version above.
+            target = "The dogs are running in the park"
+            prediction = "The dog runs in the park"
+
+            without_stemmer = RougeScorer(["rouge1"]).score(target, prediction)
+            with_stemmer = RougeScorer(["rouge1"], use_stemmer=True).score(
+                target, prediction
+            )
+
+            assert without_stemmer != with_stemmer
+
+        def test_use_stemmer_true_keeps_non_ascii_score_unchanged(
+            self,
+        ) -> None:
+            target = "テスト いち に"
+            prediction = "テスト に"
+
+            without_stemmer = RougeScorer(["rouge1"]).score(target, prediction)
+            with_stemmer = RougeScorer(["rouge1"], use_stemmer=True).score(
+                target, prediction
+            )
+
+            assert without_stemmer == with_stemmer
+
+        def test_custom_tokenizer_is_used(self) -> None:
+            class UpperCaseSplitTokenizer(Tokenizer):
+                def tokenize(self, text: str) -> list[str]:
+                    return text.split()
+
+            tokenizer = UpperCaseSplitTokenizer()
+            sut = RougeScorer(["rouge1"], tokenizer=tokenizer)
+
+            assert sut._scorer._tokenizer is tokenizer
+            # "Testing" (custom tokenizer keeps the original case) only
+            # matches itself, not the lowercased default tokenization.
+            actual = sut.score("Testing one two", "testing")
+            expected = {"rouge1": Score(0.0, 0.0, 0.0)}
+            assert actual == expected
+
+        def test_split_summaries_is_passed_to_original_scorer(self) -> None:
+            sut = RougeScorer(["rougeLsum"], split_summaries=True)
+
+            assert sut._scorer._split_summaries is True
+
+        def test_split_summaries_defaults_to_false(self) -> None:
+            sut = RougeScorer(["rougeLsum"])
+
+            assert sut._scorer._split_summaries is False
