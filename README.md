@@ -65,7 +65,11 @@ rouge-score. Unlike rouge-score's original tokenizer (which drops
 non-ascii characters), kurenai's default tokenizer
 (`AllCharacterSupportTokenizer`) only stems ASCII alphanumeric tokens of
 4+ characters, so Japanese text is left untouched even when
-`use_stemmer=True`.
+`use_stemmer=True`. Because kurenai never deletes or rewrites
+characters, tokens that still carry punctuation (e.g. `"dogs."`) are
+also left untouched and are not stemmed; split punctuation off into its
+own token (as in the space-separated examples above) if you want it
+stemmed.
 
 ```python
 >>> from kurenai.rouge_scorer import RougeScorer
