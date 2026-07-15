@@ -25,6 +25,22 @@ class AllCharacterSupportTokenizer(Tokenizer):
     ...     "いぬ が はしる"
     ... )
     ['いぬ', 'が', 'はしる']
+
+    Tokens that still carry punctuation (e.g. "dogs.") are *not* stemmed,
+    because kurenai never deletes or rewrites characters -- it only splits
+    on whitespace. This tokenizer therefore expects input that is already
+    segmented into words, with punctuation split off into its own tokens
+    (as pre-tokenized, space-separated input would look). rouge-score's
+    own tokenizer instead replaces non-alphanumeric characters with spaces
+    before stemming, so scores for raw, punctuated English sentences may
+    differ from rouge-score's. Splitting punctuation off is a tokenizer's
+    job; a Japanese-aware tokenizer that does this is planned for a later
+    phase.
+
+    >>> AllCharacterSupportTokenizer(use_stemmer=True).tokenize(
+    ...     "The dogs. are running."
+    ... )
+    ['the', 'dogs.', 'are', 'running.']
     """
 
     def __init__(self, use_stemmer: bool = False) -> None:

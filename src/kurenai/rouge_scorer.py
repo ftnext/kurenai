@@ -70,13 +70,17 @@ class RougeScorer(BaseScorer):
                 honored by kurenai's own default tokenizer
                 (AllCharacterSupportTokenizer), which only stems ASCII
                 alphanumeric tokens longer than 3 characters and leaves
-                non-ASCII tokens (e.g. Japanese) untouched. Unlike
-                rouge-score's original RougeScorer, this value is *not*
-                forwarded to rouge-score's DefaultTokenizer, because that
-                tokenizer drops non-ASCII characters. If a custom
-                ``tokenizer`` is given, this arg has no effect on it -- the
-                same as how rouge-score's use_stemmer only affects its
-                DefaultTokenizer.
+                non-ASCII tokens (e.g. Japanese) untouched. Because kurenai
+                never deletes or rewrites characters, tokens that still
+                carry punctuation (e.g. "dogs.") are not stemmed; unlike
+                rouge-score, no non-alphanumeric characters are stripped
+                before stemming, so pass in pre-tokenized, space-separated
+                text for the best results. Unlike rouge-score's original
+                RougeScorer, this value is *not* forwarded to rouge-score's
+                DefaultTokenizer, because that tokenizer drops non-ASCII
+                characters. If a custom ``tokenizer`` is given, this arg
+                has no effect on it -- the same as how rouge-score's
+                use_stemmer only affects its DefaultTokenizer.
             split_summaries: Whether to add newlines between sentences for
                 rougeLsum. This is passed through to rouge-score as-is.
                 rouge-score splits sentences with nltk.sent_tokenize, which

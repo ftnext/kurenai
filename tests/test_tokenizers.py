@@ -54,3 +54,17 @@ class TestAllCharacterSupportTokenizer:
             actual = sut.tokenize("run_ning")
 
             assert actual == ["run_ning"]
+
+        def test_punctuated_token_is_not_stemmed(self) -> None:
+            sut = AllCharacterSupportTokenizer(use_stemmer=True)
+
+            # "dogs." keeps its trailing period because this tokenizer only
+            # splits on whitespace and never deletes or rewrites
+            # characters. That period makes the token fail rouge-score's
+            # [a-z0-9]+ pattern, so it is left unstemmed -- unlike
+            # rouge-score, which strips non-alphanumeric characters before
+            # stemming. This is expected: kurenai's tokenizer is designed
+            # for pre-tokenized, space-separated input.
+            actual = sut.tokenize("The dogs. are running.")
+
+            assert actual == ["the", "dogs.", "are", "running."]
