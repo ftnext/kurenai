@@ -1,14 +1,60 @@
 from __future__ import annotations
 
+import re
+
+from nltk.stem import porter
 from rouge_score.tokenize import SPACES_RE
 from rouge_score.tokenizers import Tokenizer
+
+# ref: https://github.com/google-research/google-research/blob/master/rouge/tokenize.py  # NOQA: E501
+# rouge-score only stems tokens that consist solely of ASCII
+# alphanumeric characters and are longer than 3 characters; this mirrors
+# that rule so non-ASCII (e.g. Japanese) tokens are never touched.
+STEMMABLE_TOKEN_RE = re.compile(r"^[a-z0-9]+$")
 
 
 class AllCharacterSupportTokenizer(Tokenizer):
     """
     >>> AllCharacterSupportTokenizer().tokenize("いぬ ねこ")
     ['いぬ', 'ねこ']
+    >>> AllCharacterSupportTokenizer(use_stemmer=True).tokenize(
+    ...     "The dogs are running"
+    ... )
+    ['the', 'dog', 'are', 'run']
+    >>> AllCharacterSupportTokenizer(use_stemmer=True).tokenize(
+    ...     "いぬ が はしる"
+    ... )
+    ['いぬ', 'が', 'はしる']
+
+    Tokens that still carry punctuation (e.g. "dogs.") are *not* stemmed,
+    because kurenai never deletes or rewrites characters -- it only splits
+    on whitespace. This tokenizer therefore expects input that is already
+    segmented into words, with punctuation split off into its own tokens
+    (as pre-tokenized, space-separated input would look). rouge-score's
+    own tokenizer instead replaces non-alphanumeric characters with spaces
+    before stemming, so scores for raw, punctuated English sentences may
+    differ from rouge-score's. Splitting punctuation off is a tokenizer's
+    job; a Japanese-aware tokenizer that does this is planned for a later
+    phase.
+
+    >>> AllCharacterSupportTokenizer(use_stemmer=True).tokenize(
+    ...     "The dogs. are running."
+    ... )
+    ['the', 'dogs.', 'are', 'running.']
     """
 
+    def __init__(self, use_stemmer: bool = False) -> None:
+        self._use_stemmer = use_stemmer
+        self._stemmer = porter.PorterStemmer() if use_stemmer else None
+
     def tokenize(self, text: str) -> list[str]:
-        return SPACES_RE.split(text.lower())
+        tokens = SPACES_RE.split(text.lower())
+        if self._stemmer is None:
+            return tokens
+        return [self._maybe_stem(token) for token in tokens]
+
+    def _maybe_stem(self, token: str) -> str:
+        assert self._stemmer is not None
+        if len(token) > 3 and STEMMABLE_TOKEN_RE.match(token):
+            return str(self._stemmer.stem(token))
+        return token
