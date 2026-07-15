@@ -19,7 +19,7 @@ RougeType = Literal[
     "rouge8",
     "rouge9",
     "rougeL",
-    # "rougeLsum",  # TODO
+    "rougeLsum",
 ]
 
 
@@ -34,6 +34,7 @@ class RougeScoreDict(TypedDict, total=False):
     rouge8: Score
     rouge9: Score
     rougeL: Score
+    rougeLsum: Score
 
 
 class RougeScorer(BaseScorer):
@@ -51,6 +52,9 @@ class RougeScorer(BaseScorer):
         Valid rouge types that can be computed are:
             rougeN (e.g. rouge1, rouge2, ..., rouge9): n-gram based scoring.
             rougeL: Longest common subsequence based scoring.
+            rougeLsum: Summary-level longest common subsequence based
+                scoring. Sentences are assumed to be separated by newlines;
+                each sentence is tokenized independently before scoring.
 
         Args:
             rouge_types: An iterable of rouge types to calculate.
