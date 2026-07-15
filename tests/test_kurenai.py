@@ -81,6 +81,41 @@ class TestRougeScorer:
                 }
                 assert actual == expected
 
+            def test_rougeLsum_single_line_matches_rougeL(self) -> None:
+                # 改行を含まない1文だけの入力では、rougeLsumはrougeLと一致する
+                scorer = RougeScorer(["rougeL", "rougeLsum"])
+                actual = scorer.score("テスト いち に", "テスト いち")
+
+                precision = 2 / 2
+                recall = 2 / 3
+                fscore = fscore_helper(precision, recall)
+                expected = {
+                    "rougeL": Score(precision, recall, fscore),
+                    "rougeLsum": Score(precision, recall, fscore),
+                }
+                assert actual == expected
+
+            def test_rougeLsum(self) -> None:
+                # ref: https://github.com/google-research/google-research/blob/c34656f25265e717cc7f051a99185594892fd041/rouge/rouge_scorer_test.py#L271-L276  # NOQA: E501
+                # 改行区切りで複数文を渡すと、文ごとのLCSの和集合でsummary-levelに
+                # スコアリングされる
+                scorer = RougeScorer(["rougeLsum"])
+                actual = scorer.score(
+                    "あ い う え お", "あ い か き く\nあ う く け お"
+                )
+
+                # target: あ い う え お (5トークン)
+                # prediction 1文目: あ い か き く / 2文目: あ う く け お
+                #   (計10トークン)
+                # 1文目とのLCS: 「あ い」(2)
+                # 2文目とのLCS: 「あ う ... お」の「あ」「う」「お」(3)
+                # 和集合（重複除く）: 「あ」「い」「う」「お」の4トークンがhit
+                precision = 4 / 10
+                recall = 4 / 5
+                fscore = fscore_helper(precision, recall)
+                expected = {"rougeLsum": Score(precision, recall, fscore)}
+                assert actual == expected
+
         class TestScoreMulti:
             def test_rouge1(self) -> None:
                 scorer = RougeScorer(["rouge1"])
